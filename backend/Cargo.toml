@@ -1,22 +1,20 @@
 [package]
-name = "todomvc"
+name = "rust-service-app"
 version = "0.0.1"
 edition = "2021"
 license = "MIT OR Apache-2.0"
+authors = ["zhangrunzhao"]
+repository = "https://github.com/zhangrunzhao/rust-service-app"
 
 [dependencies]
 tokio = { version = "1", features = ["full"] }
-futures = "0.3"
-thiserror = "1.0"
-# JSON libs
-serde = "1.0"
-serde_json = "1.0"
-serde_derive = "1.0"
-# Web libs
-warp = "0.3"
-# DB Libs
-sqlx = { version = "0.6", features = ["runtime-tokio-rustls", "postgres"] }
-sqlb = "0.0.8"
+# -- Json
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# -- Web
+axum = "0.6"
+tower-cookies = "0.9"
 
 [dev-dependencies]
 anyhow = "1"
+httpc-test = "0.1.1"
