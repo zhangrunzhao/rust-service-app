@@ -1,0 +1,22 @@
+[package]
+name = "todomvc"
+version = "0.0.1"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+futures = "0.3"
+thiserror = "1.0"
+# JSON libs
+serde = "1.0"
+serde_json = "1.0"
+serde_derive = "1.0"
+# Web libs
+warp = "0.3"
+# DB Libs
+sqlx = { version = "0.6", features = ["runtime-tokio-rustls", "postgres"] }
+sqlb = "0.0.8"
+
+[dev-dependencies]
+anyhow = "1"
