@@ -1,9 +1,23 @@
 use std::fmt::Display;
 
+use crate::model;
+
 pub type Result<T> = core::result::Result<T, Error>;
 
 #[derive(Debug)]
-pub enum Error {}
+pub enum Error {
+    // -- Modules
+    Model(model::Error),
+}
+
+// region:    --- Froms
+impl From<model::Error> for Error {
+    fn from(value: model::Error) -> Self {
+        Self::Model(value)
+    }
+}
+
+// endregion: --- Froms
 
 impl Display for Error {
     fn fmt(
