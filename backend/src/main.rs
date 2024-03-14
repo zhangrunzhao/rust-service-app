@@ -10,7 +10,9 @@ use axum::{middleware, Router};
 use web::{mw_auth::mw_ctx_resolve, mw_res_map::mw_response_map, routes_static};
 
 pub use self::error::{Error, Result};
+pub use config::config;
 
+mod config;
 mod ctx;
 mod error;
 mod log;

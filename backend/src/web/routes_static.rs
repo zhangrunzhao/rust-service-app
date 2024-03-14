@@ -5,6 +5,8 @@ use axum::{
 };
 use tower_http::services::ServeDir;
 
+use crate::config;
+
 const WEB_FOLDER: &str = "../frontend/dist";
 
 pub fn serve_dir() -> MethodRouter {
@@ -12,5 +14,5 @@ pub fn serve_dir() -> MethodRouter {
         (StatusCode::NOT_FOUND, "Resource not found")
     }
 
-    any_service(ServeDir::new(WEB_FOLDER).not_found_service(handle_404.into_service()))
+    any_service(ServeDir::new(&config().WEB_FOLDER).not_found_service(handle_404.into_service()))
 }

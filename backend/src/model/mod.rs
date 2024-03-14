@@ -10,8 +10,8 @@ pub use self::error::{Error, Result};
 pub struct ModelManager {}
 
 impl ModelManager {
-	pub async fn new() -> Result<Self> {
-		// FIXME - TBC
-		Ok(ModelManager {})
-	}
+    pub async fn new() -> Result<Self> {
+        // FIXME - TBC
+        Ok(ModelManager {})
+    }
 }

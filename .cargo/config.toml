@@ -1,5 +1,0 @@
-[env]
-
-RUST_LOG = "rust_web_app=debug"
-
-SERVICE_WEB_FOLDER = "web-folder/"

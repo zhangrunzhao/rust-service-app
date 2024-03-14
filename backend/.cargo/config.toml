@@ -1,0 +1,6 @@
+[env]
+
+RUST_LOG = "rust_web_app=debug"
+
+# web 目录
+SERVICE_WEB_FOLDER = "../frontend/dist/"
