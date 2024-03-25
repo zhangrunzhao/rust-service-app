@@ -12,6 +12,7 @@
     -w --watch [目录]，监控下面的目录，如果发生改变则重新执行
     -x --execute [命令]，执行后面的命令。
 -->
-1. 服务端：cargo watch -q -c -w src/ -w .cargo/ -x "run"
-2. 客户端测试：cargo watch -q -c -w examples/ -x "run --example quick_dev"
+1. 服务端: cargo watch -q -c -w src/ -w .cargo/ -x "run"
+2. 客户端测试: cargo watch -q -c -w examples/ -x "run --example quick_dev"
+3. 单元测试: cargo watch -q -c -x "test -- --nocapture"
 
