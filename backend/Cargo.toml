@@ -30,6 +30,11 @@ tracing = "0.1"
 # 通过开启tracing-subscriber的env-filter特性，可以按crate来设置不同日志级别。https://rust-book.junmajinlong.com/ch102/tracing.html
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 # -- Crypt & Encoding
+rand = "0.8"
+# 增强型哈希算法，需要一个秘钥来进行加密
+hmac = "0.12"
+sha2 = "0.10"
+base64-url = "2"
 # -- Others
 uuid = { version = "1", features = ["v4", "fast-rng"] }
 strum_macros = "0.25"

@@ -16,3 +16,7 @@
 2. 客户端测试: cargo watch -q -c -w examples/ -x "run --example quick_dev"
 3. 单元测试: cargo watch -q -c -x "test -- --nocapture"
 
+## 本地连接数据库
+export PATH=/Library/PostgreSQL/16/bin:$PATH
+export DATABASE_URL=postgres://postgres:321chenjixink@localhost:5432/postgres?sslmode=disable
+psql $DATABASE_URL
