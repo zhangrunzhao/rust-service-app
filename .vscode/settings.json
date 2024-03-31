@@ -4,5 +4,6 @@
     "tailwindcss",
     "todomvc"
   ],
-  "css.lint.unknownAtRules": "ignore"
+  "css.lint.unknownAtRules": "ignore",
+  "editor.formatOnSave": true
 }

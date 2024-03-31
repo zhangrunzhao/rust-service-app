@@ -5,6 +5,9 @@ use crate::web::routes_login;
 use model::ModelManager;
 use std::net::SocketAddr;
 use tower_cookies::CookieManagerLayer;
+use tower_http::cors::{Any, CorsLayer};
+use tracing::info;
+use tracing_subscriber::EnvFilter;
 
 use axum::{middleware, Router};
 use web::{mw_auth::mw_ctx_resolve, mw_res_map::mw_response_map, routes_static};
@@ -21,6 +24,12 @@ mod web;
 
 #[tokio::main] // 它会使 main 异步执行
 async fn main() -> Result<()> {
+    tracing_subscriber::fmt()
+        .without_time()
+        .with_target(false)
+        .with_env_filter(EnvFilter::from_default_env())
+        .init();
+
     // Initialize ModelManager.
     let mm = ModelManager::new().await?;
 
@@ -33,7 +42,14 @@ async fn main() -> Result<()> {
         // 引入 CookieManagerLayer 后，所有的路由中的函数的第一个参数都是 cookie，参考 api_login_handler
         // 或者是：https://docs.rs/tower-cookies/latest/tower_cookies/
         .layer(CookieManagerLayer::new())
-        .fallback_service(routes_static::serve_dir());
+        .fallback_service(routes_static::serve_dir())
+        .layer(
+            // 解决跨域问题
+            CorsLayer::new()
+                .allow_methods([axum::http::Method::GET, axum::http::Method::POST])
+                .allow_origin(Any)
+                .allow_headers(Any),
+        );
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
 
