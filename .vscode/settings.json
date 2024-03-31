@@ -1,6 +1,8 @@
 {
   "cSpell.words": [
     "Froms",
+    "tailwindcss",
     "todomvc"
-  ]
+  ],
+  "css.lint.unknownAtRules": "ignore"
 }
