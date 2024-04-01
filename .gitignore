@@ -1,24 +1,6 @@
-# By Default, Ignore any .*, except .gitignore
-.*
-!.gitignore
-
-# Allows cargo config (for cargo envs)
-!.cargo/
-
-# Allows .env (for early developmment) 
-!.env
-
-# Allow vscode 
-# !.vscode
-
-# By default
-_*
 
 # --- Rust
 target/
-Cargo.lock
-# '_' in src dir, ok.
-!src/**/_*
 
 
 # nodejs accept test
