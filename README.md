@@ -13,14 +13,15 @@
     -x --execute [命令]，执行后面的命令。
 -->
 #### 后端开发
-1. 服务端: cargo watch -q -c -w src/ -w .cargo/ -x "run"
+在根目录执行 cd backend
+1. 服务端开发: cargo watch -q -c -w src/ -w .cargo/ -x "run"
 2. 客户端测试: cargo watch -q -c -w examples/ -x "run --example quick_dev"
 3. 单元测试: cargo watch -q -c -x "test -- --nocapture"
 
 #### 前端开发
-cd frontend
+在根目录执行 cd frontend
 1. 执行 pnpm dev 进入到开发模式（调用接口时需要同时调用服务端开发的第一项）
-
+2. 执行 pnpm watch 进行自测（调用接口时需要同时调用服务端开发的第一项）
 
 ## 本地连接数据库
 export PATH=/Library/PostgreSQL/16/bin:$PATH
