@@ -51,7 +51,11 @@ async fn main() -> Result<()> {
                 .allow_headers(Any),
         );
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
+    let port = 8080;
+
+    let addr = SocketAddr::from(([127, 0, 0, 1], port));
+
+    info!("服务已开启，请访问 127.0.0.1:{} 进行访问", port);
 
     axum::Server::bind(&addr)
         .serve(routes_all.into_make_service())

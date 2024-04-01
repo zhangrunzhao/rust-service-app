@@ -18,7 +18,8 @@
 3. 单元测试: cargo watch -q -c -x "test -- --nocapture"
 
 #### 前端开发
-
+cd frontend
+1. 执行 pnpm dev 进入到开发模式（调用接口时需要同时调用服务端开发的第一项）
 
 
 ## 本地连接数据库
