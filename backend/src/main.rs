@@ -13,7 +13,9 @@ use axum::{middleware, Router};
 use web::{mw_auth::mw_ctx_resolve, mw_res_map::mw_response_map, routes_static};
 
 pub use self::error::{Error, Result};
+pub use config::config;
 
+mod config;
 mod ctx;
 mod error;
 mod log;
@@ -55,7 +57,7 @@ async fn main() -> Result<()> {
 
     let addr = SocketAddr::from(([127, 0, 0, 1], port));
 
-    info!("服务已开启，请访问 127.0.0.1:{} 进行访问", port);
+    info!("正在尝试开启服务，请稍后访问 127.0.0.1:{} ", port);
 
     axum::Server::bind(&addr)
         .serve(routes_all.into_make_service())

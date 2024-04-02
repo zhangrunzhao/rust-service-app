@@ -2,4 +2,5 @@
 
 RUST_LOG = "rust_service_app=debug"
 
-SERVICE_WEB_FOLDER = "web-folder/"
+SERVICE_WEB_FOLDER = "../frontend/dist/"
+SERVICE_WEB_FILE = "../frontend/dist/index.html"
