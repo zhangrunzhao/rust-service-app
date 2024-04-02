@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* 使用 arco form 时，require 时的红色点点莫名其妙布局出错，排查出是 tailwind 的默认样式导致的 */
+svg {
+  display: inline;
+  vertical-align:text-top;
+}
