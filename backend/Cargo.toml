@@ -16,6 +16,13 @@ serde_with = "3"
 axum = "0.6"
 tower-http = { version = "0.4", features = ["fs", "cors"] }
 tower-cookies = "0.9"
+# -- DATA
+sqlx = { version = "0.6", features = [
+  "runtime-tokio-rustls",
+  "postgres",
+  "uuid",
+  "time",
+] }
 # -- Tracting
 tracing = "0.1"
 # 有时候我们自己想设置日志级别为debug来调试我们自己的程序，但这也会把其它所引用依赖的crate中的debug的日志输出出来。特别是有些时候其它crate的输出内容非常非常多，这很不友好。

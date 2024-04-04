@@ -1,5 +1,6 @@
 [env]
 
+# 这个环境变量用于服务 tracing，用于记录 debug 模式下日志仅输出我写进代码中的 info debug error 等日志上报内容
 RUST_LOG = "rust_service_app=debug"
 
 SERVICE_WEB_FOLDER = "../frontend/dist/"

@@ -22,6 +22,8 @@ mod log;
 mod model;
 mod web;
 
+mod _dev_utils;
+
 // endregion: --- Modules
 
 #[tokio::main] // 它会使 main 异步执行
@@ -31,6 +33,8 @@ async fn main() -> Result<()> {
         .with_target(false)
         .with_env_filter(EnvFilter::from_default_env())
         .init();
+
+    _dev_utils::init_dev().await;
 
     // Initialize ModelManager.
     let mm = ModelManager::new().await?;
