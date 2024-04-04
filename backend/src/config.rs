@@ -13,6 +13,9 @@ pub fn config() -> &'static Config {
 
 #[allow(non_snake_case)]
 pub struct Config {
+    // 数据库的 url 链接
+    pub DB_URL: String,
+
     // Web 的静态文件目录路径
     pub WEB_FOLDER: String,
     // Web 的静态 html 文件
@@ -22,6 +25,7 @@ pub struct Config {
 impl Config {
     fn load_from_env() -> Result<Config> {
         Ok(Config {
+            DB_URL: get_env("SERVICE_DB_URL")?,
             WEB_FOLDER: get_env("SERVICE_WEB_FOLDER")?,
             WEB_FILE: get_env("SERVICE_WEB_FILE")?,
         })
