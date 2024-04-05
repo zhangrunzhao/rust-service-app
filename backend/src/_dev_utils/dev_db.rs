@@ -3,7 +3,13 @@ use std::{fs, path::PathBuf, time::Duration};
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 use tracing::info;
 
-use crate::model::ModelManager;
+use crate::{
+    ctx::Ctx,
+    model::{
+        user::{User, UserBmc},
+        ModelManager,
+    },
+};
 
 type Db = Pool<Postgres>;
 
@@ -17,6 +23,8 @@ const PG_DEV_APP_URL: &str =
 // sql 文件
 const SQL_RECREATE_DB: &str = "sql/dev_initial/00-recreate-db.sql";
 const SQL_DIR: &str = "sql/dev_initial";
+
+const DEMO_PWD: &str = "welcome";
 
 pub async fn init_dev_db() -> Result<(), Box<dyn std::error::Error>> {
     info!("->> {:<12} ", "FOR-DEV-ONLY");
@@ -49,7 +57,17 @@ pub async fn init_dev_db() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    // info!("->> {:<12} - init_dev_db - set demo1 pwd", "FOR-DEV-ONLY");
+    // 初始化 model layer
+    let mm = ModelManager::new().await?;
+    let ctx = Ctx::root_ctx();
+
+    let demo1_user: User = UserBmc::first_by_username(&ctx, &mm, "demo1")
+        .await?
+        .unwrap();
+
+    UserBmc::update_pwd(&ctx, &mm, demo1_user.id, DEMO_PWD).await?;
+
+    info!("->> {:<12} - init_dev_db - set demo1 pwd", "FOR-DEV-ONLY");
 
     Ok(())
 }

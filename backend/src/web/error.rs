@@ -1,4 +1,4 @@
-use crate::web;
+use crate::{crypt, model, web};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use serde::Serialize;
@@ -9,11 +9,35 @@ pub type Result<T> = core::result::Result<T, Error>;
 #[serde(tag = "type", content = "data")]
 pub enum Error {
     // -- Login
-    LoginFail,
+    LoginFailUsernameNotFound,
+    LoginFailUserHasNoPwd { user_id: i64 },
+    LoginFailPwdNotMatching { user_id: i64 },
+
+    // -- Modules
+    Model(model::Error),
+
+    // -- Crypt
+    Crypt(crypt::Error),
 
     //  -- CtxExtError，常用于识别 auth 中的错误，并能够快速得提取出错误信息和错误码
     CtxExt(web::mw_auth::CtxExtError),
 }
+
+// region:    --- Froms
+
+impl From<model::Error> for Error {
+    fn from(value: model::Error) -> Self {
+        Self::Model(value)
+    }
+}
+
+impl From<crypt::Error> for Error {
+    fn from(value: crypt::Error) -> Self {
+        Self::Crypt(value)
+    }
+}
+
+// endregion: --- Froms
 
 // region:    --- Axum IntoResponse
 impl IntoResponse for Error {

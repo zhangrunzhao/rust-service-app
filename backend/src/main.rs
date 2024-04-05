@@ -16,6 +16,7 @@ pub use self::error::{Error, Result};
 pub use config::config;
 
 mod config;
+mod crypt;
 mod ctx;
 mod error;
 mod log;
@@ -41,7 +42,7 @@ async fn main() -> Result<()> {
 
     // 洋葱模型，写在后面的函数越早执行
     let routes_all = Router::new()
-        .merge(routes_login::routes())
+        .merge(routes_login::routes(mm.clone()))
         // 这个中间件主要是用于处理返回到客户端中的 res body
         .layer(middleware::map_response(mw_response_map))
         .layer(middleware::from_fn_with_state(mm.clone(), mw_ctx_resolve))

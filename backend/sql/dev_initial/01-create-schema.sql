@@ -5,5 +5,8 @@ CREATE TABLE  "user" (
   username varchar(128) NOT NULL UNIQUE,
 
   -- 验证相关字段
-  pwd varchar(256)
+  pwd varchar(256),
+  -- 下面两个字段交给数据库自动生成 uuid，它将作为加密算法的秘钥进行验证数据一致性
+  pwd_salt uuid NOT NULL DEFAULT gen_random_uuid(),
+  token_salt uuid NOT NULL DEFAULT gen_random_uuid()
 )

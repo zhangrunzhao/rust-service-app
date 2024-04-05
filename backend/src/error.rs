@@ -8,6 +8,7 @@ pub type Result<T> = core::result::Result<T, Error>;
 pub enum Error {
     // -- Config
     ConfigMissEnv(&'static str),
+    ConfigWrongFormat(&'static str),
 
     // -- Modules
     Model(model::Error),
