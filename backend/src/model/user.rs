@@ -111,3 +111,33 @@ impl UserBmc {
         Ok(())
     }
 }
+
+// region:    --- Tests
+#[cfg(test)]
+mod tests {
+    #![allow(unused)]
+    use super::*;
+    use crate::_dev_utils;
+    use anyhow::{Context, Result};
+    use serial_test::serial;
+
+    #[tokio::test]
+    async fn test_first_ok_demo1() -> Result<()> {
+        // 初始化
+        let mm = _dev_utils::init_test().await;
+        let ctx = Ctx::root_ctx();
+        let fx_username = "demo1";
+
+        // 执行
+        let user: User = UserBmc::first_by_username(&ctx, &mm, fx_username)
+            .await?
+            .context("Should have user 'demo1'")?;
+
+        // 检查
+        assert_eq!(user.username, fx_username);
+
+        Ok(())
+    }
+}
+
+// endregion: --- Tests

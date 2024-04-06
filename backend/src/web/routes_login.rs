@@ -2,7 +2,7 @@ use crate::crypt::{pwd, EncryptContent};
 use crate::ctx::Ctx;
 use crate::model::user::{UserBmc, UserForLogin};
 use crate::model::ModelManager;
-use crate::web::{Error, Result, AUTH_TOKEN};
+use crate::web::{self, Error, Result, AUTH_TOKEN};
 use axum::extract::State;
 use axum::routing::post;
 use axum::{Json, Router};
@@ -51,7 +51,9 @@ async fn api_login_handler(
     )
     .map_err(|_| Error::LoginFailPwdNotMatching { user_id })?;
 
-    cookies.add(Cookie::new(AUTH_TOKEN, "runzhao.niu.bi"));
+    // 设置 web token
+    // 此处的 token_salt 是在建表时添加的 uuid
+    web::set_token_cookie(&cookies, &user.username, &user.token_salt.to_string())?;
 
     let body = Json(json!({
       "result": {
