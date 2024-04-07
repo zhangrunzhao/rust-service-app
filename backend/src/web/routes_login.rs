@@ -2,17 +2,19 @@ use crate::crypt::{pwd, EncryptContent};
 use crate::ctx::Ctx;
 use crate::model::user::{UserBmc, UserForLogin};
 use crate::model::ModelManager;
-use crate::web::{self, Error, Result, AUTH_TOKEN};
+use crate::web::{self, remove_token_cookie, Error, Result, AUTH_TOKEN};
 use axum::extract::State;
 use axum::routing::post;
 use axum::{Json, Router};
 use serde::Deserialize;
 use serde_json::{json, Value};
 use tower_cookies::{Cookie, Cookies};
+use tracing::debug;
 
 pub fn routes(mm: ModelManager) -> Router {
     Router::new()
         .route("/api/login", post(api_login_handler))
+        .route("/api/logoff", post(api_logoff_handler))
         .with_state(mm)
 }
 
@@ -69,3 +71,32 @@ struct LoginPayload {
     username: String,
     pwd: String,
 }
+
+// region:    --- Logoff
+async fn api_logoff_handler(
+    cookies: Cookies,
+    Json(payload): Json<LogoffPayload>,
+) -> Result<Json<Value>> {
+    debug!("{:<12} - api_logoff_handler", "HANDLER");
+    let should_logoff = payload.logoff;
+
+    if should_logoff {
+        remove_token_cookie(&cookies)?;
+    }
+
+    // Create the success body.
+    let body = Json(json!({
+      "result": {
+        "logged off": should_logoff
+      }
+    }));
+
+    Ok(body)
+}
+
+#[derive(Debug, Deserialize)]
+struct LogoffPayload {
+    logoff: bool,
+}
+
+// endregion: --- Logoff

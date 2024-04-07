@@ -10,9 +10,7 @@ pub use self::error::{Error, Result};
 
 // region:    --- Time
 pub fn now_utc() -> OffsetDateTime {
-    let result = OffsetDateTime::now_utc();
-    info!("->> {:<12} {}", "now_utc", result);
-    return result;
+    OffsetDateTime::now_utc()
 }
 
 #[inline(always)]

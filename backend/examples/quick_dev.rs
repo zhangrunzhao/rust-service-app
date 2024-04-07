@@ -16,7 +16,20 @@ async fn main() -> Result<()> {
           "pwd": "welcome"
         }),
     );
+
+    hc.do_get("/hello").await?.print().await?;
+
     req_login.await?.print().await?;
+
+    let req_logoff = hc.do_post(
+        "/api/logoff",
+        json!({
+          "logoff": true
+        }),
+    );
+    req_logoff.await?.print().await?;
+
+    hc.do_get("/hello").await?.print().await?;
 
     Ok(())
 }

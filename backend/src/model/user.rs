@@ -55,6 +55,7 @@ pub trait UserBy: HasFields + for<'r> FromRow<'r, PgRow> + Unpin + Send {}
 
 impl UserBy for User {}
 impl UserBy for UserForLogin {}
+impl UserBy for UserForAuth {}
 
 // endregion: --- User Types
 

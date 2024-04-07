@@ -1,7 +1,7 @@
 #![allow(unused)]
 // region:    --- Modules
 
-use crate::web::routes_login;
+use crate::web::{mw_auth::mw_ctx_require, routes_login};
 use model::ModelManager;
 use std::net::SocketAddr;
 use tower_cookies::CookieManagerLayer;
@@ -9,7 +9,7 @@ use tower_http::cors::{Any, CorsLayer};
 use tracing::info;
 use tracing_subscriber::EnvFilter;
 
-use axum::{middleware, Router};
+use axum::{middleware, response::Html, routing::get, Router};
 use web::{mw_auth::mw_ctx_resolve, mw_res_map::mw_response_map, routes_static};
 
 pub use self::error::{Error, Result};
@@ -41,9 +41,14 @@ async fn main() -> Result<()> {
     // Initialize ModelManager.
     let mm = ModelManager::new().await?;
 
+    let routes_hello = Router::new()
+        .route("/hello", get(|| async { Html("Hello World") }))
+        .route_layer(middleware::from_fn(mw_ctx_require));
+
     // 洋葱模型，写在后面的函数越早执行
     let routes_all = Router::new()
         .merge(routes_login::routes(mm.clone()))
+        .merge(routes_hello)
         // 这个中间件主要是用于处理返回到客户端中的 res body
         .layer(middleware::map_response(mw_response_map))
         .layer(middleware::from_fn_with_state(mm.clone(), mw_ctx_resolve))
