@@ -5,6 +5,10 @@ use serde::Serialize;
 
 pub type Result<T> = core::result::Result<T, Error>;
 
+// #[serde(xxx)] 会把 json 解析后的结果 key value 提前配一下
+// 像下面的 case，Error 转成 json 会得到如下结果：
+// {"type": "LoginFailUsernameNotFound"}
+// {"type": "LoginFailUserHasNoPwd", "value": { "user_id": xxx }}
 #[derive(Debug, Serialize, strum_macros::AsRefStr)]
 #[serde(tag = "type", content = "data")]
 pub enum Error {
@@ -66,6 +70,7 @@ impl std::error::Error for Error {}
 // endregion: --- Error 默认的错误信息输出
 
 // region:    --- Client Error
+#[allow(non_snake_case)]
 impl Error {
     pub fn client_status_and_error(&self) -> (StatusCode, ClientError) {
         use web::Error::*;
@@ -73,6 +78,9 @@ impl Error {
         match self {
             // -- Login/Auth
             CtxExt(_) => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
+
+            // -- 密码错误
+            LoginFailUserHasNoPwd => (StatusCode::INTERNAL_SERVER_ERROR, ClientError::LOGIN_FAIL),
 
             // -- Fallback
             _ => (
@@ -82,13 +90,15 @@ impl Error {
         }
     }
 }
-#[derive(Debug, strum_macros::AsRefStr)]
+#[derive(Debug, Serialize, strum_macros::AsRefStr)]
+#[serde(tag = "message", content = "detail")]
 #[allow(non_camel_case_types)]
 pub enum ClientError {
     // 账号密码错误等原因引起的登录失败
     LOGIN_FAIL,
     // 票据验证失败
     NO_AUTH,
+    ENTITY_NOT_FOUND { entity: &'static str, id: i64 },
     // 服务端位置错误
     SERVICE_ERROR,
 }

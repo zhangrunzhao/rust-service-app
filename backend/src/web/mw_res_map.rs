@@ -4,7 +4,7 @@ use axum::{
     response::{IntoResponse, Response},
     Json,
 };
-use serde_json::json;
+use serde_json::{json, to_value};
 use tracing::debug;
 use uuid::Uuid;
 
@@ -21,16 +21,26 @@ pub async fn mw_response_map(
 
     // 获取 web 错误 和 错误码
     let web_error = res.extensions().get::<web::Error>();
+    // 从 client_status_and_error 中获取到错误信息
     let client_status_error = web_error.map(|se| se.client_status_and_error());
 
     // 生成错误信息
     let error_response = client_status_error
         .as_ref()
         .map(|(status_code, client_error)| {
+            // 解析元组
+            // 此处可以参考 #[serde(xxx)] 是怎么配的，可以加深理解
+            let client_error = to_value(client_error).ok();
+            let message = client_error.as_ref().and_then(|v| v.get("message"));
+            let detail = client_error.as_ref().and_then(|v| v.get("detail"));
+
             let client_error_body = json!({
                 "error": {
-                    "type": client_error.as_ref(),
-                    "req_uuid": uuid.to_string(),
+                    "message": message,
+                    "data": {
+                      "req_uuid": uuid.to_string(),
+                      "detail": detail
+                    },
                 }
             });
 
