@@ -27,3 +27,8 @@
 export PATH=/Library/PostgreSQL/16/bin:$PATH
 export DATABASE_URL=postgres://postgres:321chenjixink@localhost:5432/postgres?sslmode=disable
 psql $DATABASE_URL
+
+
+# 学习笔记
+https://www.yuque.com/guduzixue/tmvom0/dm0yu5lg065p0lqv
+

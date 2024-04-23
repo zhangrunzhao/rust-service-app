@@ -1,19 +1,19 @@
 use crate::crypt::{pwd, EncryptContent};
 use crate::ctx::Ctx;
-use crate::model::user::{UserBmc, UserForLogin};
+use crate::model::user::{UserBmc, UserForCreate, UserForLogin};
 use crate::model::ModelManager;
 use crate::web::{self, remove_token_cookie, Error, Result, AUTH_TOKEN};
 use axum::extract::State;
-use axum::routing::post;
-use axum::{Json, Router};
+use axum::{routing::post, Json, Router};
 use serde::Deserialize;
 use serde_json::{json, Value};
 use tower_cookies::{Cookie, Cookies};
-use tracing::debug;
+use tracing::{debug, info};
 
 pub fn routes(mm: ModelManager) -> Router {
     Router::new()
         .route("/api/login", post(api_login_handler))
+        .route("/api/register", post(api_register_handler))
         .route("/api/logoff", post(api_logoff_handler))
         .with_state(mm)
 }
@@ -23,7 +23,7 @@ async fn api_login_handler(
     cookies: Cookies,
     Json(payload): Json<LoginPayload>,
 ) -> Result<Json<Value>> {
-    println!("->> {:<12} - api_login_handler", "HANDLER");
+    info!("->> {:<12} - api_login_handler", "HANDLER");
 
     let LoginPayload {
         username,
@@ -72,6 +72,46 @@ struct LoginPayload {
     pwd: String,
 }
 
+// region:    --- Register
+async fn api_register_handler(
+    State(mm): State<ModelManager>,
+    cookies: Cookies,
+    Json(payload): Json<RegisterPayload>,
+) -> Result<Json<Value>> {
+    info!("->> {:<12} - api_register_handler", "HANDLER");
+
+    let RegisterPayload { username, pwd } = payload;
+    let root_ctx = Ctx::root_ctx();
+
+    let user_id: i64 = UserBmc::create::<UserForCreate>(
+        &root_ctx,
+        &mm,
+        UserForCreate {
+            username,
+            pwd: pwd.clone(),
+        },
+    )
+    .await?;
+
+    UserBmc::update_pwd(&root_ctx, &mm, user_id, &pwd).await?;
+
+    let body = Json(json!({
+      "result": {
+        "success": true
+      }
+    }));
+
+    Ok(body)
+}
+
+#[derive(Debug, Deserialize)]
+struct RegisterPayload {
+    username: String,
+    pwd: String,
+}
+
+// endregion: --- Register
+
 // region:    --- Logoff
 async fn api_logoff_handler(
     cookies: Cookies,
@@ -100,3 +140,101 @@ struct LogoffPayload {
 }
 
 // endregion: --- Logoff
+
+// region:    --- Test
+mod test {
+    #![allow(unused)]
+    use super::*;
+    use crate::_dev_utils;
+    use axum::{
+        body::Body,
+        http::{self, Request},
+    };
+    use serde::Deserialize;
+    use serde_json::json;
+    use tower::ServiceExt;
+    use tower_cookies::CookieManagerLayer;
+
+    #[derive(Debug, Deserialize)]
+    struct ResponseBody<T> {
+        result: T,
+    }
+
+    #[derive(Debug, Deserialize)]
+    struct ResponseResult {
+        success: bool,
+    }
+
+    #[tokio::test]
+    async fn test_register_api() -> Result<()> {
+        // 初始化
+        let mm = _dev_utils::init_test().await;
+        let ctx = Ctx::root_ctx();
+        let fx_username = "demo12";
+        let fx_pwd = "welcome";
+
+        let route = Router::new()
+            .merge(routes(mm))
+            .layer(CookieManagerLayer::new());
+
+        // 执行
+        // 先注册账号
+        let register_response = route
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(http::Method::POST)
+                    .uri("/api/register")
+                    .header(http::header::CONTENT_TYPE, mime::APPLICATION_JSON.as_ref())
+                    .body(Body::from(
+                        serde_json::to_string(&json!({
+                          "username": "demo3",
+                          "pwd": "welcome"
+                        }))
+                        .unwrap(),
+                    ))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+
+        let register_body = hyper::body::to_bytes(register_response.into_body())
+            .await
+            .unwrap();
+        let register_body: ResponseBody<ResponseResult> =
+            serde_json::from_slice(&register_body).unwrap();
+        // 检查注册是否成功
+        assert_eq!(register_body.result.success, true);
+
+        // 登录新创建的账号
+        let login_response = route
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method(http::Method::POST)
+                    .uri("/api/login")
+                    .header(http::header::CONTENT_TYPE, mime::APPLICATION_JSON.as_ref())
+                    .body(Body::from(
+                        serde_json::to_string(&json!({
+                          "username": "demo3",
+                          "pwd": "welcome"
+                        }))
+                        .unwrap(),
+                    ))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+
+        let login_body = hyper::body::to_bytes(login_response.into_body())
+            .await
+            .unwrap();
+        let login_body: ResponseBody<ResponseResult> = serde_json::from_slice(&login_body).unwrap();
+        // 检查注册是否成功
+        assert_eq!(login_body.result.success, true);
+
+        Ok(())
+    }
+}
+
+// endregion: --- Test

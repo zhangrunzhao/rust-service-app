@@ -20,15 +20,10 @@ pub struct User {
     pub username: String,
 }
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, Clone, FromRow, Fields, Debug)]
 pub struct UserForCreate {
     pub username: String,
-    pub pwd_clear: String,
-}
-
-#[derive(Fields)]
-pub struct UserForInsert {
-    username: String,
+    pub pwd: String,
 }
 
 #[derive(Clone, FromRow, Fields, Debug)]
@@ -56,6 +51,7 @@ pub trait UserBy: HasFields + for<'r> FromRow<'r, PgRow> + Unpin + Send {}
 impl UserBy for User {}
 impl UserBy for UserForLogin {}
 impl UserBy for UserForAuth {}
+impl UserBy for UserForCreate {}
 
 // endregion: --- User Types
 
@@ -71,6 +67,18 @@ impl UserBmc {
         E: UserBy,
     {
         base::get::<Self, E>(ctx, mm, id).await
+    }
+
+    pub async fn create<E>(ctx: &Ctx, mm: &ModelManager, user_c: UserForCreate) -> Result<i64>
+    where
+        E: UserBy,
+    {
+        let id = base::create::<Self, _>(ctx, mm, user_c.clone()).await?;
+
+        // 给新增的账号进行密码加密
+        Self::update_pwd(ctx, mm, id, &user_c.pwd).await?;
+
+        Ok(id)
     }
 
     pub async fn first_by_username<E>(
@@ -123,7 +131,7 @@ mod tests {
     use serial_test::serial;
 
     #[tokio::test]
-    async fn test_first_ok_demo1() -> Result<()> {
+    async fn test_first_by_username_ok_demo1() -> Result<()> {
         // 初始化
         let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
@@ -136,6 +144,44 @@ mod tests {
 
         // 检查
         assert_eq!(user.username, fx_username);
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn test_create_user_ok_demo12() -> Result<()> {
+        // 初始化
+        let mm = _dev_utils::init_test().await;
+        let ctx = Ctx::root_ctx();
+        let fx_username = "demo12";
+        let fx_pwd = "welcome";
+
+        // 执行
+        // 先创建一个角色
+        let _ = UserBmc::create::<UserForCreate>(
+            &ctx,
+            &mm,
+            UserForCreate {
+                username: fx_username.to_string(),
+                pwd: fx_pwd.to_string(),
+            },
+        )
+        .await?;
+
+        // 创建完毕后再进行登录
+        let user: UserForLogin = UserBmc::first_by_username(&ctx, &mm, fx_username)
+            .await?
+            .context("Should have user 'demo12'")?;
+
+        // 注册完毕后在数据库中的 pwd 是已经被加密过的字段，我们校验的时候需要把明文加密一遍
+        let pwd = pwd::encrypt_pwd(&EncryptContent {
+            content: fx_pwd.to_string(),
+            salt: user.pwd_salt.to_string(),
+        })?;
+
+        // 校验账号密码是否对得上
+        assert_eq!(user.username, fx_username);
+        assert_eq!(user.pwd, Some(pwd));
 
         Ok(())
     }

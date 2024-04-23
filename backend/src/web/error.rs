@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use crate::{crypt, model, web};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
@@ -16,6 +18,9 @@ pub enum Error {
     LoginFailUsernameNotFound,
     LoginFailUserHasNoPwd { user_id: i64 },
     LoginFailPwdNotMatching { user_id: i64 },
+
+    // -- Register
+    RegisterFail,
 
     // -- Modules
     Model(model::Error),
@@ -80,7 +85,37 @@ impl Error {
             CtxExt(_) => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
 
             // -- 密码错误
-            LoginFailUserHasNoPwd => (StatusCode::INTERNAL_SERVER_ERROR, ClientError::LOGIN_FAIL),
+            LoginFailUserHasNoPwd { user_id } => {
+                (StatusCode::INTERNAL_SERVER_ERROR, ClientError::LOGIN_FAIL)
+            }
+
+            // -- Model Error
+            Model(error) => {
+                match error {
+                    model::Error::Sqlx(sqlx_err) => {
+                        if let Some(db_err) = sqlx_err.as_database_error() {
+                            if db_err.code().take() == Some(Cow::Owned(String::from("23505"))) {
+                                return (
+                                    StatusCode::INTERNAL_SERVER_ERROR,
+                                    ClientError::USERNAME_ALREADY_EXIST,
+                                );
+                            }
+                        };
+
+                        return (
+                            StatusCode::INTERNAL_SERVER_ERROR,
+                            ClientError::SERVICE_ERROR,
+                        );
+                    }
+
+                    _ => {
+                        return (
+                            StatusCode::INTERNAL_SERVER_ERROR,
+                            ClientError::SERVICE_ERROR,
+                        );
+                    }
+                };
+            }
 
             // -- Fallback
             _ => (
@@ -101,6 +136,9 @@ pub enum ClientError {
     ENTITY_NOT_FOUND { entity: &'static str, id: i64 },
     // 服务端位置错误
     SERVICE_ERROR,
+
+    // 用户名已存在
+    USERNAME_ALREADY_EXIST,
 }
 
 // endregion: --- Client Error

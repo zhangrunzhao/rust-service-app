@@ -13,7 +13,9 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 serde_with = "3"
 # -- Web
-axum = "0.6"
+axum = { version = "0.6.20", features = ["default", "headers"] }
+axum-extra = { version = "0.8" }
+tower = { version = "0.4", features = ["util"] }
 tower-http = { version = "0.4", features = ["fs", "cors"] }
 tower-cookies = "0.9"
 # -- DATA
@@ -41,6 +43,8 @@ time = "0.3"
 strum_macros = "0.25"
 lazy-regex = "3"
 async-trait = "0.1"
+hyper = "0.14.27"
+mime = "0.3"
 
 [dev-dependencies]
 anyhow = "1"

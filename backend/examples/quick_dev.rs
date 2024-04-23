@@ -1,7 +1,18 @@
 #![allow(unused)] // For beginning only.
 
 use anyhow::Result;
+use serde::{Deserialize, Serialize};
 use serde_json::json;
+
+#[derive(Debug, Deserialize)]
+struct ResponseBody<T> {
+    result: T,
+}
+
+#[derive(Debug, Deserialize)]
+struct ResponseResult {
+    success: bool,
+}
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -9,27 +20,35 @@ async fn main() -> Result<()> {
 
     hc.do_get("/").await?.print().await?;
 
-    let req_login = hc.do_post(
-        "/api/login",
+    let req_register = hc.do_post(
+        "/api/register",
         json!({
-          "username": "demo1",
+          "username":"demo131",
           "pwd": "welcome"
         }),
     );
 
-    hc.do_get("/hello").await?.print().await?;
+    req_register.await?.print().await?;
 
-    req_login.await?.print().await?;
-
-    let req_logoff = hc.do_post(
-        "/api/logoff",
+    let req_login = hc.do_post(
+        "/api/login",
         json!({
-          "logoff": true
+          "username": "demo131",
+          "pwd": "welcome"
         }),
     );
-    req_logoff.await?.print().await?;
 
+    req_login.await?.print().await?;
     hc.do_get("/hello").await?.print().await?;
 
+    // let req_logoff = hc.do_post(
+    //     "/api/logoff",
+    //     json!({
+    //       "logoff": true
+    //     }),
+    // );
+    // req_logoff.await?.print().await?;
+
+    // hc.do_get("/hello").await?.print().await?;
     Ok(())
 }
