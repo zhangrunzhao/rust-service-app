@@ -27,7 +27,6 @@ export const Login: React.FC<LoginProps> = () => {
       const username = form.getFieldValue('username');
       const pwd = form.getFieldValue('pwd');
 
-      // await httpGet('/happy?id=12345');
       await httpPost('/api/login', {
         username,
         pwd,

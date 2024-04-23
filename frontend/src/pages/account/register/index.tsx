@@ -27,9 +27,7 @@ export const Register: React.FC<RegisterProps> = () => {
       const username = form.getFieldValue('username');
       const pwd = form.getFieldValue('pwd');
 
-      // await httpGet('/happy?id=12345');
-      // TODO: 开发一下注册的接口
-      await httpPost('/api/login', {
+      await httpPost('/api/register', {
         username,
         pwd,
       });
