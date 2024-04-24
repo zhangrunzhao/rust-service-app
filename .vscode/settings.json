@@ -11,7 +11,8 @@
     "sslmode",
     "tailwindcss",
     "Tauri",
-    "todomvc"
+    "todomvc",
+    "unsync"
   ],
   "css.lint.unknownAtRules": "ignore",
   "editor.formatOnSave": true,

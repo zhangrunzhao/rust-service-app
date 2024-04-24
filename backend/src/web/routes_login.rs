@@ -58,8 +58,8 @@ async fn api_login_handler(
     web::set_token_cookie(&cookies, &user.username, &user.token_salt.to_string())?;
 
     let body = Json(json!({
-      "result": {
-        "success": true
+      "data": {
+        "user_id": user.id
       }
     }));
 
@@ -96,8 +96,8 @@ async fn api_register_handler(
     UserBmc::update_pwd(&root_ctx, &mm, user_id, &pwd).await?;
 
     let body = Json(json!({
-      "result": {
-        "success": true
+      "data": {
+        "user_id": user_id
       }
     }));
 
@@ -157,12 +157,13 @@ mod test {
 
     #[derive(Debug, Deserialize)]
     struct ResponseBody<T> {
-        result: T,
+        code: i32,
+        data: T,
     }
 
     #[derive(Debug, Deserialize)]
-    struct ResponseResult {
-        success: bool,
+    struct ResponseData {
+        user_id: i32,
     }
 
     #[tokio::test]
@@ -201,10 +202,10 @@ mod test {
         let register_body = hyper::body::to_bytes(register_response.into_body())
             .await
             .unwrap();
-        let register_body: ResponseBody<ResponseResult> =
+        let register_body: ResponseBody<ResponseData> =
             serde_json::from_slice(&register_body).unwrap();
         // 检查注册是否成功
-        assert_eq!(register_body.result.success, true);
+        assert_eq!(register_body.code, 0);
 
         // 登录新创建的账号
         let login_response = route
@@ -229,9 +230,9 @@ mod test {
         let login_body = hyper::body::to_bytes(login_response.into_body())
             .await
             .unwrap();
-        let login_body: ResponseBody<ResponseResult> = serde_json::from_slice(&login_body).unwrap();
+        let login_body: ResponseBody<ResponseData> = serde_json::from_slice(&login_body).unwrap();
         // 检查注册是否成功
-        assert_eq!(login_body.result.success, true);
+        assert_eq!(register_body.code, 0);
 
         Ok(())
     }

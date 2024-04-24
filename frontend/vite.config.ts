@@ -20,4 +20,12 @@ export default defineConfig({
       plugins: [tailwindcss, autoprefixer],
     },
   },
+
+  server: {
+    proxy: {
+      // 反向代理服务器
+      '/api': 'http://localhost:8080',
+    }
+  }
+
 });

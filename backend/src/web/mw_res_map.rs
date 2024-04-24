@@ -1,10 +1,12 @@
 use crate::log::log_request;
 use axum::{
+    body::{Bytes, HttpBody},
     http::{Method, Uri},
     response::{IntoResponse, Response},
     Json,
 };
-use serde_json::{json, to_value};
+use serde::Deserialize;
+use serde_json::{json, to_value, Map, Value};
 use tracing::debug;
 use uuid::Uuid;
 
@@ -35,9 +37,10 @@ pub async fn mw_response_map(
             let detail = client_error.as_ref().and_then(|v| v.get("detail"));
 
             let client_error_body = json!({
-                "error": {
+                "code": 9999,
+                "data": {
                     "message": message,
-                    "data": {
+                    "error": {
                       "req_uuid": uuid.to_string(),
                       "detail": detail
                     },
@@ -54,7 +57,34 @@ pub async fn mw_response_map(
     let client_error = client_status_error.unzip().1;
     let _ = log_request(uuid, req_method, uri, ctx, web_error, client_error).await;
 
+    // 生成标准的响应信息
+    // let success_response = (res.status(), Json())
+
+    let new_res = res
+        .boxed_unsync()
+        // 将 data 的数据重新映射一下，加上 code 字段
+        .map_data(|data| {
+            let body_result = serde_json::from_slice::<Value>(&data);
+
+            // 如果 json 解析成功，则映射一下 json 结果并返回
+            if (body_result.is_ok()) {
+                let body: Value = body_result.unwrap();
+
+                let new_json = json!({
+                    "code": 0,
+                    "data": body["data"]
+                })
+                .to_string();
+
+                let new_data = Bytes::copy_from_slice(new_json.as_bytes());
+                return new_data;
+            }
+
+            data
+        })
+        .into_response();
+
     debug!("\n");
 
-    error_response.unwrap_or(res)
+    error_response.unwrap_or(new_res)
 }
