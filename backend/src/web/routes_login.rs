@@ -9,6 +9,7 @@ use serde::Deserialize;
 use serde_json::{json, Value};
 use tower_cookies::{Cookie, Cookies};
 use tracing::{debug, info};
+use ts_rs::TS;
 
 pub fn routes(mm: ModelManager) -> Router {
     Router::new()
@@ -21,11 +22,11 @@ pub fn routes(mm: ModelManager) -> Router {
 async fn api_login_handler(
     State(mm): State<ModelManager>,
     cookies: Cookies,
-    Json(payload): Json<LoginPayload>,
+    Json(payload): Json<LoginReq>,
 ) -> Result<Json<Value>> {
     info!("->> {:<12} - api_login_handler", "HANDLER");
 
-    let LoginPayload {
+    let LoginReq {
         username,
         pwd: pwd_clear,
     } = payload;
@@ -66,21 +67,28 @@ async fn api_login_handler(
     Ok(body)
 }
 
-#[derive(Debug, Deserialize)]
-struct LoginPayload {
+#[derive(Debug, Deserialize, TS)]
+#[ts(export, export_to = "user/")]
+struct LoginReq {
     username: String,
     pwd: String,
+}
+
+#[derive(Debug, Deserialize, TS)]
+#[ts(export, export_to = "user/")]
+struct LoginResp {
+    user_id: i32,
 }
 
 // region:    --- Register
 async fn api_register_handler(
     State(mm): State<ModelManager>,
     cookies: Cookies,
-    Json(payload): Json<RegisterPayload>,
+    Json(payload): Json<RegisterReq>,
 ) -> Result<Json<Value>> {
     info!("->> {:<12} - api_register_handler", "HANDLER");
 
-    let RegisterPayload { username, pwd } = payload;
+    let RegisterReq { username, pwd } = payload;
     let root_ctx = Ctx::root_ctx();
 
     let user_id: i64 = UserBmc::create::<UserForCreate>(
@@ -104,10 +112,17 @@ async fn api_register_handler(
     Ok(body)
 }
 
-#[derive(Debug, Deserialize)]
-struct RegisterPayload {
+#[derive(Debug, Deserialize, TS)]
+#[ts(export, export_to = "user/")]
+struct RegisterReq {
     username: String,
     pwd: String,
+}
+
+#[derive(Debug, Deserialize, TS)]
+#[ts(export, export_to = "user/")]
+struct RegisterResp {
+    user_id: i32,
 }
 
 // endregion: --- Register
@@ -115,7 +130,7 @@ struct RegisterPayload {
 // region:    --- Logoff
 async fn api_logoff_handler(
     cookies: Cookies,
-    Json(payload): Json<LogoffPayload>,
+    Json(payload): Json<LogoffReq>,
 ) -> Result<Json<Value>> {
     debug!("{:<12} - api_logoff_handler", "HANDLER");
     let should_logoff = payload.logoff;
@@ -126,17 +141,24 @@ async fn api_logoff_handler(
 
     // Create the success body.
     let body = Json(json!({
-      "result": {
-        "logged off": should_logoff
+      "data": {
+        "logged_off": should_logoff
       }
     }));
 
     Ok(body)
 }
 
-#[derive(Debug, Deserialize)]
-struct LogoffPayload {
+#[derive(Debug, Deserialize, TS)]
+#[ts(export, export_to = "user/")]
+struct LogoffReq {
     logoff: bool,
+}
+
+#[derive(Debug, Deserialize, TS)]
+#[ts(export, export_to = "user/")]
+struct LogoffResp {
+    logged_off: bool,
 }
 
 // endregion: --- Logoff
@@ -157,13 +179,7 @@ mod test {
 
     #[derive(Debug, Deserialize)]
     struct ResponseBody<T> {
-        code: i32,
         data: T,
-    }
-
-    #[derive(Debug, Deserialize)]
-    struct ResponseData {
-        user_id: i32,
     }
 
     #[tokio::test]
@@ -202,10 +218,8 @@ mod test {
         let register_body = hyper::body::to_bytes(register_response.into_body())
             .await
             .unwrap();
-        let register_body: ResponseBody<ResponseData> =
+        let register_body: ResponseBody<RegisterResp> =
             serde_json::from_slice(&register_body).unwrap();
-        // 检查注册是否成功
-        assert_eq!(register_body.code, 0);
 
         // 登录新创建的账号
         let login_response = route
@@ -230,9 +244,9 @@ mod test {
         let login_body = hyper::body::to_bytes(login_response.into_body())
             .await
             .unwrap();
-        let login_body: ResponseBody<ResponseData> = serde_json::from_slice(&login_body).unwrap();
-        // 检查注册是否成功
-        assert_eq!(register_body.code, 0);
+        let login_body: ResponseBody<LoginResp> = serde_json::from_slice(&login_body).unwrap();
+        // 检查注册和登录是否成功
+        assert_eq!(register_body.data.user_id, login_body.data.user_id);
 
         Ok(())
     }

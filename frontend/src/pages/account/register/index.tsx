@@ -2,14 +2,16 @@ import { Button, Form, Input, Notification } from '@arco-design/web-react';
 import { useMemoizedFn, useRequest } from 'ahooks';
 import { httpPost } from '@/utils';
 import { useNavigate } from 'react-router-dom';
+import { RegisterReq } from '@/types/api/user/RegisterReq';
+import { RegisterResp } from '@/types/api/user/RegisterResp';
 
 const FormItem = Form.Item;
 
 interface RegisterProps {}
 
 interface AccountFormFields {
-  username: String;
-  pwd: String;
+  username: string;
+  pwd: string;
 }
 
 // 该组件主要用于注册相关事项
@@ -27,10 +29,13 @@ export const Register: React.FC<RegisterProps> = () => {
       const username = form.getFieldValue('username');
       const pwd = form.getFieldValue('pwd');
 
-      const result = await httpPost('/api/register', {
-        username,
-        pwd,
-      });
+      const result = await httpPost<RegisterReq, RegisterResp>(
+        '/api/register',
+        {
+          username,
+          pwd,
+        }
+      );
 
       const { code } = result;
 

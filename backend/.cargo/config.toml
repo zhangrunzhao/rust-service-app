@@ -13,3 +13,6 @@ SERVICE_TOKEN_DURATION_SEC = "1800"
 # web 项目的静态路径
 SERVICE_WEB_FOLDER = "../frontend/dist/"
 SERVICE_WEB_FILE = "../frontend/dist/index.html"
+
+# TS_RS 的默认导出路径
+TS_RS_EXPORT_DIR = "../frontend/src/types/api"

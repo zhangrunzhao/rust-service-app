@@ -45,6 +45,8 @@ lazy-regex = "3"
 async-trait = "0.1"
 hyper = "0.14.27"
 mime = "0.3"
+# 引入前后端参数类型定义工具
+ts-rs = "8.1"
 
 [dev-dependencies]
 anyhow = "1"

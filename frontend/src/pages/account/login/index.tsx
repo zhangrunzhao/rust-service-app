@@ -10,14 +10,16 @@ import { httpPost } from '@/utils';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { userAtom } from '@/store';
+import { LoginReq } from '@/types/api/user/LoginReq';
+import { LoginResp } from '@/types/api/user/LoginResp';
 
 const FormItem = Form.Item;
 
 interface LoginProps {}
 
 interface AccountFormFields {
-  username: String;
-  pwd: String;
+  username: string;
+  pwd: string;
 }
 
 // 该组件主要用于登录相关事项
@@ -59,7 +61,7 @@ export const Login: React.FC<LoginProps> = () => {
       const username = form.getFieldValue('username');
       const pwd = form.getFieldValue('pwd');
 
-      const result = await httpPost('/api/login', {
+      const result = await httpPost<LoginReq, LoginResp>('/api/login', {
         username,
         pwd,
       });
