@@ -1,4 +1,4 @@
-import { Button, Form, Input } from '@arco-design/web-react';
+import { Button, Form, Input, Notification } from '@arco-design/web-react';
 import { useMemoizedFn, useRequest } from 'ahooks';
 import { httpPost } from '@/utils';
 import { useNavigate } from 'react-router-dom';
@@ -27,10 +27,21 @@ export const Register: React.FC<RegisterProps> = () => {
       const username = form.getFieldValue('username');
       const pwd = form.getFieldValue('pwd');
 
-      await httpPost('/api/register', {
+      const result = await httpPost('/api/register', {
         username,
         pwd,
       });
+
+      const { code } = result;
+
+      if (!code) {
+        Notification.info({
+          closable: false,
+          content: '注册成功，请在登录页面完成登录',
+        });
+
+        gotoLoginPage();
+      }
     },
     {
       manual: true,

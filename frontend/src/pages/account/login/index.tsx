@@ -1,7 +1,15 @@
-import { Button, Form, Input } from '@arco-design/web-react';
-import { useMemoizedFn, useRequest } from 'ahooks';
+import { Button, Form, Input, Message } from '@arco-design/web-react';
+import {
+  useCountDown,
+  useMemoizedFn,
+  useRequest,
+  useUpdateEffect,
+} from 'ahooks';
+import { useAtom } from 'jotai';
 import { httpPost } from '@/utils';
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { userAtom } from '@/store';
 
 const FormItem = Form.Item;
 
@@ -17,8 +25,32 @@ export const Login: React.FC<LoginProps> = () => {
   const [form] = Form.useForm<AccountFormFields>();
   const navigate = useNavigate();
 
+  const [, setUserInfo] = useAtom(userAtom);
+
+  const [leftTime, setLeftTime] = useState(0);
+  const [countdown] = useCountDown({
+    leftTime,
+  });
+
+  useUpdateEffect(() => {
+    const currentCount = Math.round(countdown / 1000);
+    Message.info({
+      id: 'countdown_message',
+      content: `登陆成功，${currentCount} 秒后跳转到首页`,
+      className: currentCount ? '' : 'hidden',
+    });
+
+    if (!currentCount) {
+      gotoHomePage();
+    }
+  }, [countdown]);
+
   const gotoRegisterPage = useMemoizedFn(() => {
     navigate('/account/register');
+  });
+
+  const gotoHomePage = useMemoizedFn(() => {
+    navigate('/');
   });
 
   const { run: login } = useRequest(
@@ -27,10 +59,19 @@ export const Login: React.FC<LoginProps> = () => {
       const username = form.getFieldValue('username');
       const pwd = form.getFieldValue('pwd');
 
-      await httpPost('/api/login', {
+      const result = await httpPost('/api/login', {
         username,
         pwd,
       });
+
+      const { code, data } = result;
+
+      if (!code) {
+        // 开始倒计时
+        setLeftTime(3000);
+      }
+
+      setUserInfo(data);
     },
     {
       manual: true,
