@@ -1,6 +1,5 @@
 // region:    --- Modules
 mod error;
-pub mod pwd;
 pub mod token;
 
 use hmac::{Hmac, Mac};

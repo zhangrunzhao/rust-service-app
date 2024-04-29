@@ -21,6 +21,7 @@ mod ctx;
 mod error;
 mod log;
 mod model;
+mod pwd;
 mod utils;
 mod web;
 

@@ -1,7 +1,7 @@
-use crate::crypt::{pwd, EncryptContent};
 use crate::ctx::Ctx;
 use crate::model::user::{UserBmc, UserForCreate, UserForLogin};
 use crate::model::ModelManager;
+use crate::pwd::{self, ContentToHash};
 use crate::web::{self, remove_token_cookie, Error, Result, AUTH_TOKEN};
 use axum::extract::State;
 use axum::{routing::post, Json, Router};
@@ -46,8 +46,8 @@ async fn api_login_handler(
     };
 
     pwd::validate_pwd(
-        &EncryptContent {
-            salt: user.pwd_salt.to_string(),
+        &ContentToHash {
+            salt: user.pwd_salt,
             content: pwd_clear.clone(),
         },
         &pwd,

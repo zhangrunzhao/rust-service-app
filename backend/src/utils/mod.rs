@@ -2,6 +2,7 @@ use time::{format_description::well_known::Rfc3339, Duration, OffsetDateTime};
 use tracing::info;
 
 // region:    --- Modules
+pub mod b64;
 mod error;
 
 pub use self::error::{Error, Result};

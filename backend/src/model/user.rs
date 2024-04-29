@@ -1,7 +1,7 @@
 use crate::{
-    crypt::{pwd, EncryptContent},
     ctx::Ctx,
     model::{Error, Result},
+    pwd::{self, ContentToHash},
 };
 use serde::{Deserialize, Serialize};
 use sqlb::{Field, Fields, HasFields};
@@ -105,9 +105,9 @@ impl UserBmc {
 
         let user: UserForLogin = Self::get(ctx, mm, id).await?;
 
-        let pwd = pwd::encrypt_pwd(&EncryptContent {
+        let pwd = pwd::hash_pwd(&ContentToHash {
             content: pwd_clear.to_string(),
-            salt: user.pwd_salt.to_string(),
+            salt: user.pwd_salt,
         })?;
 
         sqlb::update()
@@ -174,9 +174,9 @@ mod tests {
             .context("Should have user 'demo12'")?;
 
         // 注册完毕后在数据库中的 pwd 是已经被加密过的字段，我们校验的时候需要把明文加密一遍
-        let pwd = pwd::encrypt_pwd(&EncryptContent {
+        let pwd = pwd::hash_pwd(&ContentToHash {
             content: fx_pwd.to_string(),
-            salt: user.pwd_salt.to_string(),
+            salt: user.pwd_salt,
         })?;
 
         // 校验账号密码是否对得上

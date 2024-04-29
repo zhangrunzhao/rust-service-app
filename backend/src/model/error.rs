@@ -2,6 +2,8 @@ use serde::Serialize;
 
 use crate::crypt;
 
+use crate::pwd;
+
 use super::store;
 use serde_with::{serde_as, DisplayFromStr};
 
@@ -16,6 +18,9 @@ pub enum Error {
 
     // Crypt
     Crypt(crypt::Error),
+
+    // Pwd
+    Pwd(pwd::Error),
 
     Sqlx(#[serde_as(as = "DisplayFromStr")] sqlx::Error),
 }
@@ -36,6 +41,12 @@ impl From<sqlx::Error> for Error {
 impl From<crypt::Error> for Error {
     fn from(value: crypt::Error) -> Self {
         Self::Crypt(value)
+    }
+}
+
+impl From<pwd::Error> for Error {
+    fn from(value: pwd::Error) -> Self {
+        Self::Pwd(value)
     }
 }
 
