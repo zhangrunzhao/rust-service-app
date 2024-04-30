@@ -1,6 +1,6 @@
 use serde::Serialize;
 
-use crate::crypt;
+use crate::token;
 
 use crate::pwd;
 
@@ -16,8 +16,8 @@ pub enum Error {
     // Modules
     Store(store::Error),
 
-    // Crypt
-    Crypt(crypt::Error),
+    // Token
+    Token(token::Error),
 
     // Pwd
     Pwd(pwd::Error),
@@ -38,9 +38,9 @@ impl From<sqlx::Error> for Error {
     }
 }
 
-impl From<crypt::Error> for Error {
-    fn from(value: crypt::Error) -> Self {
-        Self::Crypt(value)
+impl From<token::Error> for Error {
+    fn from(value: token::Error) -> Self {
+        Self::Token(value)
     }
 }
 

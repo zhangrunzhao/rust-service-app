@@ -16,12 +16,12 @@ pub use self::error::{Error, Result};
 pub use config::config;
 
 mod config;
-mod crypt;
 mod ctx;
 mod error;
 mod log;
 mod model;
 mod pwd;
+mod token;
 mod utils;
 mod web;
 

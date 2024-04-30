@@ -56,7 +56,7 @@ async fn api_login_handler(
 
     // 设置 web token
     // 此处的 token_salt 是在建表时添加的 uuid
-    web::set_token_cookie(&cookies, &user.username, &user.token_salt.to_string())?;
+    web::set_token_cookie(&cookies, &user.username, user.token_salt)?;
 
     let body = Json(json!({
       "data": {

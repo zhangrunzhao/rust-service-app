@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 
-use crate::{crypt, model, web};
+use crate::{model, token, web};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use serde::Serialize;
@@ -25,8 +25,8 @@ pub enum Error {
     // -- Modules
     Model(model::Error),
 
-    // -- Crypt
-    Crypt(crypt::Error),
+    // -- Token
+    Token(token::Error),
 
     //  -- CtxExtError，常用于识别 auth 中的错误，并能够快速得提取出错误信息和错误码
     CtxExt(web::mw_auth::CtxExtError),
@@ -40,9 +40,9 @@ impl From<model::Error> for Error {
     }
 }
 
-impl From<crypt::Error> for Error {
-    fn from(value: crypt::Error) -> Self {
-        Self::Crypt(value)
+impl From<token::Error> for Error {
+    fn from(value: token::Error) -> Self {
+        Self::Token(value)
     }
 }
 
