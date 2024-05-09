@@ -21,6 +21,11 @@ impl From<model::Error> for Error {
 	}
 }
 
+
+
+
+ 
+
 // endregion: --- Froms
 
 impl Display for Error {
