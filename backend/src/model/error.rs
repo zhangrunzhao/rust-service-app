@@ -2,53 +2,38 @@ use serde::Serialize;
 
 use crate::token;
 
-use crate::pwd;
-
 use super::store;
+use crate::pwd;
+use derive_more::From;
 use serde_with::{serde_as, DisplayFromStr};
 
 pub type Result<T> = core::result::Result<T, Error>;
 
 #[serde_as]
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, From)]
 pub enum Error {
+    #[from]
     EntityNotFound { entity: &'static str, id: i64 },
     // Modules
+    #[from]
     Store(store::Error),
 
     // Token
+    #[from]
     Token(token::Error),
 
     // Pwd
+    #[from]
     Pwd(pwd::Error),
 
+    #[from]
     Sqlx(#[serde_as(as = "DisplayFromStr")] sqlx::Error),
+
+    #[from]
+    SeaQuery(#[serde_as(as = "DisplayFromStr")] sea_query::error::Error),
 }
 
 // region:    --- Froms
-impl From<store::Error> for Error {
-    fn from(value: store::Error) -> Self {
-        Self::Store(value)
-    }
-}
-
-impl From<sqlx::Error> for Error {
-    fn from(value: sqlx::Error) -> Self {
-        Self::Sqlx(value)
-    }
-}
-
-impl From<token::Error> for Error {
-    fn from(value: token::Error) -> Self {
-        Self::Token(value)
-    }
-}
-
-impl From<pwd::Error> for Error {
-    fn from(value: pwd::Error) -> Self {
-        Self::Pwd(value)
-    }
-}
 
 // endregion: --- Froms
 

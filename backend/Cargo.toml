@@ -19,13 +19,14 @@ tower = { version = "0.4", features = ["util"] }
 tower-http = { version = "0.4", features = ["fs", "cors"] }
 tower-cookies = "0.9"
 # -- DATA
-sqlx = { version = "0.6", features = [
-  "runtime-tokio-rustls",
-  "postgres",
-  "uuid",
-  "time",
+sqlx = { version = "0.7", features = ["runtime-tokio", "postgres", "uuid"] }
+# 可以跨数据库使用
+sea-query = "0.30"
+sea-query-binder = { version = "0.5", features = [
+  "sqlx-postgres",
+  "with-uuid",
 ] }
-sqlb = "0.3"
+modql = { version = "0.3", features = ["with-sea-query"] }
 # -- Tracting
 tracing = "0.1"
 # 有时候我们自己想设置日志级别为debug来调试我们自己的程序，但这也会把其它所引用依赖的crate中的debug的日志输出出来。特别是有些时候其它crate的输出内容非常非常多，这很不友好。
@@ -48,6 +49,7 @@ mime = "0.3"
 # 引入前后端参数类型定义工具
 ts-rs = "8.1"
 base64 = "0.21"
+derive_more = { version = "1.0.0-beta", features = ["from"] }
 
 [dev-dependencies]
 anyhow = "1"
