@@ -1,59 +1,19 @@
-[package]
-name = "rust-service-app"
-version = "0.0.1"
-edition = "2021"
-license = "MIT OR Apache-2.0"
-authors = ["zhangrunzhao"]
-repository = "https://github.com/zhangrunzhao/rust-service-app"
+[workspace.lints.rust]
+unsafe_code = "forbid"
+unused = "allow"       # For experimental dev.
 
-[dependencies]
-tokio = { version = "1", features = ["full"] }
-# -- Json
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-serde_with = "3"
-# -- Web
-axum = { version = "0.6.20", features = ["default", "headers"] }
-axum-extra = { version = "0.8" }
-tower = { version = "0.4", features = ["util"] }
-tower-http = { version = "0.4", features = ["fs", "cors"] }
-tower-cookies = "0.9"
-# -- DATA
-sqlx = { version = "0.7", features = ["runtime-tokio", "postgres", "uuid"] }
-# 可以跨数据库使用
-sea-query = "0.30"
-sea-query-binder = { version = "0.5", features = [
-  "sqlx-postgres",
-  "with-uuid",
-] }
-modql = { version = "0.3", features = ["with-sea-query"] }
-# -- Tracting
-tracing = "0.1"
-# 有时候我们自己想设置日志级别为debug来调试我们自己的程序，但这也会把其它所引用依赖的crate中的debug的日志输出出来。特别是有些时候其它crate的输出内容非常非常多，这很不友好。
-# 通过开启tracing-subscriber的env-filter特性，可以按crate来设置不同日志级别。https://rust-book.junmajinlong.com/ch102/tracing.html
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-# -- Crypt & Encoding
-rand = "0.8"
-# 增强型哈希算法，需要一个秘钥来进行加密
-hmac = "0.12"
-sha2 = "0.10"
-base64-url = "2"
-# -- Others
-uuid = { version = "1", features = ["v4", "fast-rng"] }
-time = "0.3"
-strum_macros = "0.25"
-lazy-regex = "3"
-async-trait = "0.1"
-hyper = "0.14.27"
-mime = "0.3"
-# 引入前后端参数类型定义工具
-ts-rs = "8.1"
-base64 = "0.21"
-derive_more = { version = "1.0.0-beta", features = ["from"] }
+[workspace]
+resolver = "2"
+members = [
+  # -- Application Libraries
+  "crates/libs/lib-utils", # e.g., base64, time.
+  "crates/libs/lib-rpc",   # e.g., rpc routing.
+  "crates/libs/lib-auth",  # e.g., for pwd, token.
+  "crates/libs/lib-core",  # e.g., model, ctx, config.
 
-[dev-dependencies]
-anyhow = "1"
-httpc-test = "0.1.1"
-# 如果不做特殊操作，所有的测试都会并行执行
-# 然而我们的单元测试存在初始化数据库的操作，并行执行将无法确定该数据库是否能得到预期之内的结果，所以我们需要一些工具让测试变成串行执行
-serial_test = "2"
+  # -- Application Services
+  "crates/services/web-server",
+
+  # -- Tools
+  "crates/tools/gen-key",
+]
